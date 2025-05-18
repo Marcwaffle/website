@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Orthographic Tesseract Animation (Slower)</title>
+  <title>Orthographic Tesseract Animation with Input</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Retro font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <style>
     html, body {
       background: #000;
@@ -13,20 +15,135 @@
       height: 100vh;
       overflow: hidden;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      font-family: 'VT323', monospace, 'Fira Mono', 'Courier New', Courier, monospace;
+      letter-spacing: 0.5px;
+    }
+    .hypercube-flicker {
+      animation: flicker 4s infinite steps(1);
     }
     canvas {
       display: block;
       background: #000;
       border-radius: 10px;
       box-shadow: 0 0 22px #000b;
+      margin-bottom: 24px;
+      /* Flicker effect for the hypercube */
+      animation: flicker 3.7s infinite steps(1);
+    }
+    .input-area {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: stretch;
+      font-family: inherit;
+    }
+    .input-area input[type="text"] {
+      padding: 10px 12px;
+      font-size: 1.4em;
+      font-family: inherit;
+      border-radius: 2px;
+      border: 2px solid var(--accent-color, #0ff);
+      background: #111;
+      color: var(--accent-color, #0ff);
+      outline: none;
+      width: 260px;
+      box-shadow: none;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      letter-spacing: 1.5px;
+      caret-color: var(--accent-color, #0ff);
+      text-shadow: none;
+      height: 44px;
+      box-sizing: border-box;
+      display: inline-block;
+    }
+    .input-area input[type="text"]:focus {
+      border-color: #fff;
+      background: #111922;
+      color: #fff;
+      caret-color: #fff;
+    }
+    .input-area button {
+      font-size: 1.2em;
+      font-family: inherit;
+      border-radius: 2px;
+      border: 2px solid var(--accent-color, #0ff);
+      background: #111;
+      color: var(--accent-color, #0ff);
+      cursor: pointer;
+      box-shadow: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      letter-spacing: 1px;
+      text-shadow: none;
+      padding: 0 24px;
+      height: 44px;
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .input-area button:hover, .input-area button:focus {
+      background: var(--accent-color, #0ff);
+      color: #111;
+      border-color: #fff;
+    }
+    .output-message {
+      margin-top: 18px;
+      color: var(--accent-color, #00fff7);
+      min-height: 1.5em;
+      text-align: center;
+      font-family: inherit;
+      font-size: 1.32em;
+      text-shadow: 0 0 8px var(--accent-glow, #00f0ff99), 0 0 2px #fff;
+      letter-spacing: 1px;
+      user-select: text;
+      animation: flicker 4s infinite;
+      transition: color 0.2s, text-shadow 0.2s;
+    }
+    :root {
+      --accent-color: #0ff;
+      --accent-glow: #00f0ff99;
+    }
+    .zalgo-theme {
+      --accent-color: #ff2222;
+      --accent-glow: #ff222280;
+    }
+    .habit-theme {
+      --accent-color: #b600ff;
+      --accent-glow: #b600ff80;
+    }
+    .slendy-theme {
+      --accent-color: #d4d4d4;
+      --accent-glow: #cccccc80;
+    }
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+      }
+      20%, 22%, 24%, 55% {
+        opacity: 0.4;
+      }
+      70%, 72% {
+        opacity: 0.75;
+      }
+      73%, 74% {
+        opacity: 0.55;
+      }
     }
   </style>
 </head>
 <body>
-  <canvas id="hypercube"></canvas>
+  <canvas id="hypercube" class="hypercube-flicker"></canvas>
+  <div class="input-area">
+    <input type="text" id="userInput" placeholder="Type something..." autocomplete="off" />
+    <button id="enterBtn">ENTER</button>
+  </div>
+  <div class="output-message" id="outputMsg"></div>
   <script>
+    // --- Tesseract (hypercube) code with dynamic color ---
     function generateVertices() {
       const v = [];
       for (let x = -1; x <= 1; x += 2)
@@ -81,7 +198,6 @@
       }
       return r;
     }
-    // Orthographic projection
     function project4to3([x, y, z, w]) {
       return [x, y, z];
     }
@@ -94,7 +210,6 @@
 
     const canvas = document.getElementById('hypercube');
     const ctx = canvas.getContext('2d');
-
     const verts4d = generateVertices();
     const edges = generateEdges(verts4d);
 
@@ -115,15 +230,30 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    let time = 0;
-    function draw() {
+    // Animation time using requestAnimationFrame for smoothness
+    let prevTimestamp = null;
+    let hypercubeTime = 0;
+
+    // Color state (default neon blue, or red for zalgo, or purple for habit, or gray for slendy)
+    let currentColor = "#00fff7";
+    let currentColorFill = "#00fff7";
+
+    function draw(timestamp) {
+      if (!prevTimestamp) prevTimestamp = timestamp;
+      // Animation speed (set by user, e.g., 0.0006 for slow, 0.05 for fast)
+      let delta = (timestamp - prevTimestamp) || 16.67;
+      prevTimestamp = timestamp;
+      hypercubeTime += delta * 0.0006;
+
       ctx.clearRect(0, 0, width, height);
 
-      // Slower animation speed (was 0.018)
-      time += 0.010;
+      // Use the CSS variable if possible for accent
+      const cssAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+      currentColor = cssAccent ? cssAccent : "#00fff7";
+      currentColorFill = currentColor;
 
-      // Only rotate in the time (w) direction for a "true hypercube" effect,
-      // and a small bit in the 3D rotations to avoid perfect symmetry.
+      let time = hypercubeTime;
+
       let m = rot4d(0, 3, time * 1.2);
       m = matMul(rot4d(1, 3, time * 0.8), m);
       m = matMul(rot4d(2, 3, time * 0.6), m);
@@ -138,7 +268,7 @@
       });
 
       ctx.save();
-      ctx.strokeStyle = "#fff";
+      ctx.strokeStyle = currentColor;
       ctx.lineWidth = 2;
       ctx.globalAlpha = 0.93;
       for (const [i, j] of edges) {
@@ -150,7 +280,7 @@
       ctx.restore();
 
       ctx.save();
-      ctx.fillStyle = "#fff";
+      ctx.fillStyle = currentColorFill;
       for (const [x, y] of points2d) {
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, Math.PI * 2);
@@ -160,7 +290,79 @@
 
       requestAnimationFrame(draw);
     }
-    draw();
+    requestAnimationFrame(draw);
+
+    // --- Input field logic ---
+    const input = document.getElementById('userInput');
+    const btn = document.getElementById('enterBtn');
+    const out = document.getElementById('outputMsg');
+
+    function adjustButtonHeight() {
+      btn.style.height = input.offsetHeight + 'px';
+    }
+
+    window.addEventListener('resize', adjustButtonHeight);
+    window.addEventListener('DOMContentLoaded', adjustButtonHeight);
+    setTimeout(adjustButtonHeight, 100);
+    input.addEventListener('input', adjustButtonHeight);
+
+    // Theme switching: none (default), zalgo, habit, slendy
+    function setTheme(theme) {
+      document.documentElement.classList.remove('zalgo-theme', 'habit-theme', 'slendy-theme');
+      if (theme === 'zalgo') {
+        document.documentElement.classList.add('zalgo-theme');
+      } else if (theme === 'habit') {
+        document.documentElement.classList.add('habit-theme');
+      } else if (theme === 'slendy') {
+        document.documentElement.classList.add('slendy-theme');
+      }
+    }
+
+    // Remember last effect (for theme persistence when box is cleared)
+    let lastTheme = null;
+
+    // Acceptable passwords for slendy
+    const slendyPasswords = [
+      "slendy", "slenderman", "slender", "the operator", "operator"
+    ];
+
+    function handleAction() {
+      const value = input.value.trim();
+
+      if (value.length === 0) {
+        setTheme(null);
+        lastTheme = null;
+        out.textContent = "The void stares back";
+      } else if (/^zalgo$/i.test(value)) {
+        setTheme('zalgo');
+        lastTheme = 'zalgo';
+        out.textContent = "good choice";
+      } else if (/^habit$/i.test(value)) {
+        setTheme('habit');
+        lastTheme = 'habit';
+        out.textContent = "Got any babies?";
+      } else if (slendyPasswords.some(pw => pw.toLowerCase() === value.toLowerCase())) {
+        setTheme('slendy');
+        lastTheme = 'slendy';
+        out.textContent = "...";
+        window.open("https://en.wikipedia.org/wiki/Tree", "_blank");
+      } else {
+        setTheme(null);
+        lastTheme = null;
+        out.textContent = "INCORRECT PASSWORD";
+      }
+
+      input.value = "";
+      // Keep effect as per last entered value
+      setTheme(lastTheme);
+    }
+
+    btn.addEventListener('click', handleAction);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === "Enter") {
+        handleAction();
+      }
+    });
   </script>
 </body>
 </html>
