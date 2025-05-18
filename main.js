@@ -104,7 +104,7 @@ function draw(timestamp) {
   currentColorFill = currentColor;
 
   let time = hypercubeTime;
-
+z
   let m = rot4d(0, 3, time * 1.2);
   m = matMul(rot4d(1, 3, time * 0.8), m);
   m = matMul(rot4d(2, 3, time * 0.6), m);
@@ -143,7 +143,6 @@ function draw(timestamp) {
 }
 requestAnimationFrame(draw);
 
-// --- Password Logic (Caesar cipher shift by 5, NO PLAINTEXT in code) ---
 function caesarCipher(str, shift = 5) {
   return str.replace(/[a-z]/gi, c => {
     const code = c.charCodeAt(0);
@@ -155,16 +154,15 @@ function caesarCipher(str, shift = 5) {
   });
 }
 
-// All password values are shifted versions, and property names are generic
 const passwords = {
-  one: "efqlt",      // 'zalgo' shifted +5
-  two: "mfgny",      // 'habit' shifted +5
+  one: "efqlt",
+  two: "mfgny",
   three: [
-    "xqjsid",        // 'slendy' shifted +5
-    "xqjsijwfsr",    // 'slenderman' shifted +5
-    "xqjsijw",       // 'slender' shifted +5
-    "ymj tusjwfyt",  // 'the operator' shifted +5
-    "tujwfyt"        // 'operator' shifted +5
+    "xqjsid",
+    "xqjsijwfsr",
+    "xqjsijw",
+    "ymj tusjwfyt",
+    "tujwfyt"
   ]
 };
 
@@ -176,7 +174,6 @@ function checkPassword(input) {
   return 0;
 }
 
-// --- Input field logic ---
 const input = document.getElementById('userInput');
 const btn = document.getElementById('enterBtn');
 const out = document.getElementById('outputMsg');
@@ -190,19 +187,17 @@ window.addEventListener('DOMContentLoaded', adjustButtonHeight);
 setTimeout(adjustButtonHeight, 100);
 input.addEventListener('input', adjustButtonHeight);
 
-// Theme switching: none (default), theme1, theme2, theme3
 function setTheme(theme) {
-  document.documentElement.classList.remove('zalgo-theme', 'habit-theme', 'slendy-theme');
+  document.documentElement.classList.remove('t1', 't2', 't3');
   if (theme === 1) {
-    document.documentElement.classList.add('zalgo-theme');
+    document.documentElement.classList.add('t1');
   } else if (theme === 2) {
-    document.documentElement.classList.add('habit-theme');
+    document.documentElement.classList.add('t2');
   } else if (theme === 3) {
-    document.documentElement.classList.add('slendy-theme');
+    document.documentElement.classList.add('t3');
   }
 }
 
-// Remember last effect (for theme persistence when box is cleared)
 let lastTheme = null;
 
 function handleAction() {

@@ -98,15 +98,15 @@ canvas {
   --accent-color: #0ff;
   --accent-glow: #00f0ff99;
 }
-.zalgo-theme {
+.t1 {
   --accent-color: #ff2222;
   --accent-glow: #ff222280;
 }
-.habit-theme {
+.t2 {
   --accent-color: #b600ff;
   --accent-glow: #b600ff80;
 }
-.slendy-theme {
+.t3 {
   --accent-color: #d4d4d4;
   --accent-glow: #cccccc80;
 }
