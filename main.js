@@ -164,7 +164,7 @@ const passwords = {
     "ymj tusjwfyt",
     "tujwfyt"
   ],
-  four: "jnlmyjjsstajrgjw"
+  four: "jnlmjjsstajrgjw"
 };
 
 function checkPassword(input) {
@@ -202,6 +202,74 @@ function setTheme(theme) {
   }
 }
 
+// Morse code for "... . -..-"
+const morsePattern = [
+  { beat: true, duration: 200 },   // S
+  { beat: false, duration: 200 },  // gap
+  { beat: true, duration: 200 },   // S
+  { beat: false, duration: 200 },  // gap
+  { beat: true, duration: 200 },   // S
+  { beat: false, duration: 600 },  // gap (3 units)
+  { beat: true, duration: 200 },   // S
+  { beat: false, duration: 600 },  // gap (3 units)
+  { beat: true, duration: 600 },   // L
+  { beat: false, duration: 200 },  // gap
+  { beat: true, duration: 200 },   // S
+  { beat: false, duration: 200 },  // gap
+  { beat: true, duration: 200 },   // S
+  { beat: false, duration: 200 },  // gap
+  { beat: true, duration: 600 },   // L
+];
+
+let heartbeatActive = false;
+let heartbeatTimer = null;
+
+function startMorseHeartbeat() {
+  const heart = document.getElementById('bigHeart');
+  if (!heart) return;
+  heartbeatActive = true;
+  let i = 0;
+  function nextBeat() {
+    if (!heartbeatActive) {
+      heart.style.transform = 'scale(1)';
+      return;
+    }
+    const { beat, duration } = morsePattern[i];
+    heart.style.transform = beat ? 'scale(1.2)' : 'scale(1)';
+    i = (i + 1) % morsePattern.length;
+    heartbeatTimer = setTimeout(nextBeat, duration);
+  }
+  nextBeat();
+}
+
+function stopMorseHeartbeat() {
+  heartbeatActive = false;
+  if (heartbeatTimer) clearTimeout(heartbeatTimer);
+  const heart = document.getElementById('bigHeart');
+  if (heart) heart.style.transform = 'scale(1)';
+}
+
+// Audio framework
+let carelessAudio = null;
+function playCarelessAudio() {
+  if (!carelessAudio) {
+    carelessAudio = document.createElement('audio');
+    carelessAudio.src = 'assets/careless.mp3'; // relative path for GitHub Pages project site
+    carelessAudio.id = 'carelessAudio';
+    carelessAudio.loop = true;
+    carelessAudio.style.display = 'none';
+    document.body.appendChild(carelessAudio);
+  }
+  carelessAudio.currentTime = 0;
+  carelessAudio.play().catch(() => {});
+}
+function stopCarelessAudio() {
+  if (carelessAudio) {
+    carelessAudio.pause();
+    carelessAudio.currentTime = 0;
+  }
+}
+
 function showHeart() {
   const canvas = document.getElementById('hypercube');
   if (canvas) canvas.style.display = 'none';
@@ -222,11 +290,11 @@ function showHeart() {
     heart.style.justifyContent = 'center';
     heart.style.alignItems = 'center';
     heart.style.margin = '10px 0 30px 0';
-    heart.style.animation = 'heartbeat 1.2s infinite';
     document.body.insertBefore(heart, document.body.firstChild);
   } else {
     heart.style.display = 'flex';
   }
+  startMorseHeartbeat();
   playCarelessAudio();
 }
 
@@ -235,27 +303,8 @@ function hideHeart() {
   if (canvas) canvas.style.display = '';
   const heart = document.getElementById('bigHeart');
   if (heart) heart.style.display = 'none';
+  stopMorseHeartbeat();
   stopCarelessAudio();
-}
-
-let carelessAudio = null;
-function playCarelessAudio() {
-  if (!carelessAudio) {
-    carelessAudio = document.createElement('audio');
-    carelessAudio.src = 'assets/careless.mp3';
-    carelessAudio.id = 'carelessAudio';
-    carelessAudio.loop = true;
-    carelessAudio.style.display = 'none';
-    document.body.appendChild(carelessAudio);
-  }
-  carelessAudio.currentTime = 0;
-  carelessAudio.play().catch(() => {});
-}
-function stopCarelessAudio() {
-  if (carelessAudio) {
-    carelessAudio.pause();
-    carelessAudio.currentTime = 0;
-  }
 }
 
 let lastTheme = null;
