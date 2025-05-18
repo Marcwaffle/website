@@ -85,24 +85,20 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Animation time using requestAnimationFrame for smoothness
 let prevTimestamp = null;
 let hypercubeTime = 0;
 
-// Color state (default neon blue, or red for zalgo, or purple for habit, or gray for slendy)
 let currentColor = "#00fff7";
 let currentColorFill = "#00fff7";
 
 function draw(timestamp) {
   if (!prevTimestamp) prevTimestamp = timestamp;
-  // Animation speed (set by user, e.g., 0.0006 for slow, 0.05 for fast)
   let delta = (timestamp - prevTimestamp) || 16.67;
   prevTimestamp = timestamp;
   hypercubeTime += delta * 0.0006;
 
   ctx.clearRect(0, 0, width, height);
 
-  // Use the CSS variable if possible for accent
   const cssAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
   currentColor = cssAccent ? cssAccent : "#00fff7";
   currentColorFill = currentColor;
@@ -147,35 +143,37 @@ function draw(timestamp) {
 }
 requestAnimationFrame(draw);
 
-// --- Password Logic (obscured) ---
-function simpleHash(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash<<5)-hash) + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash;
+// --- Password Logic (Caesar cipher shift by 5, NO PLAINTEXT in code) ---
+function caesarCipher(str, shift = 5) {
+  return str.replace(/[a-z]/gi, c => {
+    const code = c.charCodeAt(0);
+    const base = (c >= 'a' && c <= 'z') ? 97 : 65;
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+      return String.fromCharCode(((code - base + shift) % 26) + base);
+    }
+    return c;
+  });
 }
 
-// Store only hashes, not plain text
+// All password values are shifted versions, and property names are generic
 const passwords = {
-  zalgo: simpleHash("zalgo"),
-  habit: simpleHash("habit"),
-  slendy: [
-    simpleHash("slendy"),
-    simpleHash("slenderman"),
-    simpleHash("slender"),
-    simpleHash("the operator"),
-    simpleHash("operator")
+  one: "efqlt",      // 'zalgo' shifted +5
+  two: "mfgny",      // 'habit' shifted +5
+  three: [
+    "xqjsid",        // 'slendy' shifted +5
+    "xqjsijwfsr",    // 'slenderman' shifted +5
+    "xqjsijw",       // 'slender' shifted +5
+    "ymj tusjwfyt",  // 'the operator' shifted +5
+    "tujwfyt"        // 'operator' shifted +5
   ]
 };
 
 function checkPassword(input) {
-  const hash = simpleHash(input.trim().toLowerCase());
-  if (hash === passwords.zalgo) return "zalgo";
-  if (hash === passwords.habit) return "habit";
-  if (passwords.slendy.includes(hash)) return "slendy";
-  return null;
+  const shifted = caesarCipher(input.trim().toLowerCase(), 5);
+  if (shifted === passwords.one) return 1;
+  if (shifted === passwords.two) return 2;
+  if (passwords.three.includes(shifted)) return 3;
+  return 0;
 }
 
 // --- Input field logic ---
@@ -192,14 +190,14 @@ window.addEventListener('DOMContentLoaded', adjustButtonHeight);
 setTimeout(adjustButtonHeight, 100);
 input.addEventListener('input', adjustButtonHeight);
 
-// Theme switching: none (default), zalgo, habit, slendy
+// Theme switching: none (default), theme1, theme2, theme3
 function setTheme(theme) {
   document.documentElement.classList.remove('zalgo-theme', 'habit-theme', 'slendy-theme');
-  if (theme === 'zalgo') {
+  if (theme === 1) {
     document.documentElement.classList.add('zalgo-theme');
-  } else if (theme === 'habit') {
+  } else if (theme === 2) {
     document.documentElement.classList.add('habit-theme');
-  } else if (theme === 'slendy') {
+  } else if (theme === 3) {
     document.documentElement.classList.add('slendy-theme');
   }
 }
@@ -215,17 +213,17 @@ function handleAction() {
     setTheme(null);
     lastTheme = null;
     out.textContent = "The void stares back";
-  } else if (passwordType === "zalgo") {
-    setTheme('zalgo');
-    lastTheme = 'zalgo';
+  } else if (passwordType === 1) {
+    setTheme(1);
+    lastTheme = 1;
     out.textContent = "good choice";
-  } else if (passwordType === "habit") {
-    setTheme('habit');
-    lastTheme = 'habit';
+  } else if (passwordType === 2) {
+    setTheme(2);
+    lastTheme = 2;
     out.textContent = "Got any babies?";
-  } else if (passwordType === "slendy") {
-    setTheme('slendy');
-    lastTheme = 'slendy';
+  } else if (passwordType === 3) {
+    setTheme(3);
+    lastTheme = 3;
     out.textContent = "...";
     window.open("https://en.wikipedia.org/wiki/Tree", "_blank");
   } else {
@@ -235,7 +233,6 @@ function handleAction() {
   }
 
   input.value = "";
-  // Keep effect as per last entered value
   setTheme(lastTheme);
 }
 
