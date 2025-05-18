@@ -63,6 +63,7 @@ function project3to2([x, y, z], width, height, size) {
   ];
 }
 
+const container = document.getElementById('display-container');
 const canvas = document.getElementById('hypercube');
 const ctx = canvas.getContext('2d');
 const verts4d = generateVertices();
@@ -164,7 +165,8 @@ const passwords = {
     "ymj tusjwfyt",
     "tujwfyt"
   ],
-  four: "jnlmyjjsstajrgjw"
+  four: "jnlmyjjsstajrgjw",
+  five: "xjc" 
 };
 
 function checkPassword(input) {
@@ -173,34 +175,13 @@ function checkPassword(input) {
   if (shifted === passwords.two) return 2;
   if (passwords.three.includes(shifted)) return 3;
   if (shifted === passwords.four) return 4;
+  if (shifted === passwords.five) return 5;
   return 0;
 }
 
 const input = document.getElementById('userInput');
 const btn = document.getElementById('enterBtn');
 const out = document.getElementById('outputMsg');
-
-function adjustButtonHeight() {
-  btn.style.height = input.offsetHeight + 'px';
-}
-
-window.addEventListener('resize', adjustButtonHeight);
-window.addEventListener('DOMContentLoaded', adjustButtonHeight);
-setTimeout(adjustButtonHeight, 100);
-input.addEventListener('input', adjustButtonHeight);
-
-function setTheme(theme) {
-  document.documentElement.classList.remove('t1', 't2', 't3', 't4');
-  if (theme === 1) {
-    document.documentElement.classList.add('t1');
-  } else if (theme === 2) {
-    document.documentElement.classList.add('t2');
-  } else if (theme === 3) {
-    document.documentElement.classList.add('t3');
-  } else if (theme === 4) {
-    document.documentElement.classList.add('t4');
-  }
-}
 
 // Morse code for "... . -..-"
 const morsePattern = [
@@ -270,9 +251,11 @@ function stopCarelessAudio() {
   }
 }
 
+// Show/Hide the heart (for password 4)
 function showHeart() {
-  const canvas = document.getElementById('hypercube');
-  if (canvas) canvas.style.display = 'none';
+  hideJumpscareImg();
+  canvas.style.display = 'none';
+
   let heart = document.getElementById('bigHeart');
   if (!heart) {
     heart = document.createElement('div');
@@ -290,7 +273,7 @@ function showHeart() {
     heart.style.justifyContent = 'center';
     heart.style.alignItems = 'center';
     heart.style.margin = '10px 0 30px 0';
-    document.body.insertBefore(heart, document.body.firstChild);
+    container.appendChild(heart);
   } else {
     heart.style.display = 'flex';
   }
@@ -299,13 +282,65 @@ function showHeart() {
 }
 
 function hideHeart() {
-  const canvas = document.getElementById('hypercube');
-  if (canvas) canvas.style.display = '';
-  const heart = document.getElementById('bigHeart');
+  canvas.style.display = '';
+  let heart = document.getElementById('bigHeart');
   if (heart) heart.style.display = 'none';
   stopMorseHeartbeat();
   stopCarelessAudio();
 }
+
+// Show/Hide jumpscare popup for password 5
+function showJumpscareImg() {
+  hideHeart();
+  canvas.style.display = '';
+
+  // Remove any existing popup to avoid stacking
+  let popup = document.getElementById('jumpscare-popup');
+  if (popup) popup.remove();
+
+  popup = document.createElement('div');
+  popup.id = 'jumpscare-popup';
+
+  const img = document.createElement('img');
+  img.src = 'assets/no.png';
+  img.alt = 'NO';
+
+  popup.appendChild(img);
+  document.body.appendChild(popup);
+
+  popup.style.display = 'block';
+
+  // Optionally, auto-hide after a second or two for jumpscare effect:
+  setTimeout(() => {
+    popup.style.display = 'none';
+  }, 1700);
+}
+
+function hideJumpscareImg() {
+  let popup = document.getElementById('jumpscare-popup');
+  if (popup) popup.remove();
+}
+
+function setTheme(theme) {
+  document.documentElement.classList.remove('t1', 't2', 't3', 't4');
+  if (theme === 1) {
+    document.documentElement.classList.add('t1');
+  } else if (theme === 2) {
+    document.documentElement.classList.add('t2');
+  } else if (theme === 3) {
+    document.documentElement.classList.add('t3');
+  } else if (theme === 4) {
+    document.documentElement.classList.add('t4');
+  }
+}
+
+function adjustButtonHeight() {
+  btn.style.height = input.offsetHeight + 'px';
+}
+window.addEventListener('resize', adjustButtonHeight);
+window.addEventListener('DOMContentLoaded', adjustButtonHeight);
+setTimeout(adjustButtonHeight, 100);
+input.addEventListener('input', adjustButtonHeight);
 
 let lastTheme = null;
 
@@ -318,32 +353,45 @@ function handleAction() {
     lastTheme = null;
     out.textContent = "The void stares back";
     hideHeart();
+    hideJumpscareImg();
   } else if (passwordType === 1) {
     setTheme(1);
     lastTheme = 1;
     out.textContent = "good choice";
     hideHeart();
+    hideJumpscareImg();
   } else if (passwordType === 2) {
     setTheme(2);
     lastTheme = 2;
     out.textContent = "Got any babies?";
     hideHeart();
+    hideJumpscareImg();
   } else if (passwordType === 3) {
     setTheme(3);
     lastTheme = 3;
     out.textContent = "...";
     hideHeart();
+    hideJumpscareImg();
     window.open("https://en.wikipedia.org/wiki/Tree", "_blank");
   } else if (passwordType === 4) {
     setTheme(4);
     lastTheme = 4;
     out.textContent = "I love her";
     showHeart();
+    hideJumpscareImg();
+  } else if (passwordType === 5) {
+    // "sex" password
+    setTheme(1); // slender palette (red)
+    lastTheme = 1;
+    out.textContent = "naughty naughty";
+    showJumpscareImg();
+    hideHeart();
   } else {
     setTheme(null);
     lastTheme = null;
     out.textContent = "INCORRECT PASSWORD";
     hideHeart();
+    hideJumpscareImg();
   }
 
   input.value = "";
