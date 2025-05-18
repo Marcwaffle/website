@@ -164,7 +164,7 @@ const passwords = {
     "ymj tusjwfyt",
     "tujwfyt"
   ],
-  four: "jnlmjjsstajrgjw"
+  four: "jnlmyjjsstajrgjw"
 };
 
 function checkPassword(input) {
@@ -242,7 +242,7 @@ let carelessAudio = null;
 function playCarelessAudio() {
   if (!carelessAudio) {
     carelessAudio = document.createElement('audio');
-    carelessAudio.src = '/assets/careless.mp3';
+    carelessAudio.src = 'assets/careless.mp3';
     carelessAudio.id = 'carelessAudio';
     carelessAudio.loop = true;
     carelessAudio.style.display = 'none';
