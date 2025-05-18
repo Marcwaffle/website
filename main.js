@@ -104,7 +104,7 @@ function draw(timestamp) {
   currentColorFill = currentColor;
 
   let time = hypercubeTime;
-z
+
   let m = rot4d(0, 3, time * 1.2);
   m = matMul(rot4d(1, 3, time * 0.8), m);
   m = matMul(rot4d(2, 3, time * 0.6), m);
