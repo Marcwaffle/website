@@ -164,7 +164,7 @@ const passwords = {
     "ymj tusjwfyt",
     "tujwfyt"
   ],
-  four: "jnlmjjsstajrgjw"
+  four: "jnlmyjjsstajrgjw"
 };
 
 function checkPassword(input) {
