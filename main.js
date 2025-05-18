@@ -163,7 +163,8 @@ const passwords = {
     "xqjsijw",
     "ymj tusjwfyt",
     "tujwfyt"
-  ]
+  ],
+  four: "jnlmjjsstajrgjw"
 };
 
 function checkPassword(input) {
@@ -171,6 +172,7 @@ function checkPassword(input) {
   if (shifted === passwords.one) return 1;
   if (shifted === passwords.two) return 2;
   if (passwords.three.includes(shifted)) return 3;
+  if (shifted === passwords.four) return 4;
   return 0;
 }
 
@@ -188,13 +190,71 @@ setTimeout(adjustButtonHeight, 100);
 input.addEventListener('input', adjustButtonHeight);
 
 function setTheme(theme) {
-  document.documentElement.classList.remove('t1', 't2', 't3');
+  document.documentElement.classList.remove('t1', 't2', 't3', 't4');
   if (theme === 1) {
     document.documentElement.classList.add('t1');
   } else if (theme === 2) {
     document.documentElement.classList.add('t2');
   } else if (theme === 3) {
     document.documentElement.classList.add('t3');
+  } else if (theme === 4) {
+    document.documentElement.classList.add('t4');
+  }
+}
+
+function showHeart() {
+  const canvas = document.getElementById('hypercube');
+  if (canvas) canvas.style.display = 'none';
+  let heart = document.getElementById('bigHeart');
+  if (!heart) {
+    heart = document.createElement('div');
+    heart.id = 'bigHeart';
+    heart.innerHTML = `
+      <svg width="180" height="150" viewBox="0 0 60 50">
+        <path d="M30 47
+          L5 25
+          A15 15 0 0 1 30 10
+          A15 15 0 0 1 55 25
+          Z" fill="#ff69b4" stroke="#fff" stroke-width="2"/>
+      </svg>
+    `;
+    heart.style.display = 'flex';
+    heart.style.justifyContent = 'center';
+    heart.style.alignItems = 'center';
+    heart.style.margin = '10px 0 30px 0';
+    heart.style.animation = 'heartbeat 1.2s infinite';
+    document.body.insertBefore(heart, document.body.firstChild);
+  } else {
+    heart.style.display = 'flex';
+  }
+  playCarelessAudio();
+}
+
+function hideHeart() {
+  const canvas = document.getElementById('hypercube');
+  if (canvas) canvas.style.display = '';
+  const heart = document.getElementById('bigHeart');
+  if (heart) heart.style.display = 'none';
+  stopCarelessAudio();
+}
+
+let carelessAudio = null;
+function playCarelessAudio() {
+  if (!carelessAudio) {
+    carelessAudio = document.createElement('audio');
+    carelessAudio.src = '/assets/careless.mp3';
+    carelessAudio.id = 'carelessAudio';
+    carelessAudio.loop = true;
+    carelessAudio.style.display = 'none';
+    document.body.appendChild(carelessAudio);
+  }
+  carelessAudio.currentTime = 0;
+  carelessAudio.play().catch(() => {});
+}
+function stopCarelessAudio() {
+  if (carelessAudio) {
+    carelessAudio.pause();
+    carelessAudio.currentTime = 0;
   }
 }
 
@@ -208,23 +268,33 @@ function handleAction() {
     setTheme(null);
     lastTheme = null;
     out.textContent = "The void stares back";
+    hideHeart();
   } else if (passwordType === 1) {
     setTheme(1);
     lastTheme = 1;
     out.textContent = "good choice";
+    hideHeart();
   } else if (passwordType === 2) {
     setTheme(2);
     lastTheme = 2;
     out.textContent = "Got any babies?";
+    hideHeart();
   } else if (passwordType === 3) {
     setTheme(3);
     lastTheme = 3;
     out.textContent = "...";
+    hideHeart();
     window.open("https://en.wikipedia.org/wiki/Tree", "_blank");
+  } else if (passwordType === 4) {
+    setTheme(4);
+    lastTheme = 4;
+    out.textContent = "I love her";
+    showHeart();
   } else {
     setTheme(null);
     lastTheme = null;
     out.textContent = "INCORRECT PASSWORD";
+    hideHeart();
   }
 
   input.value = "";

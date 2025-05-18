@@ -110,6 +110,10 @@ canvas {
   --accent-color: #d4d4d4;
   --accent-glow: #cccccc80;
 }
+.t4 {
+  --accent-color: #ff69b4;
+  --accent-glow: #ff69b480;
+}
 @keyframes flicker {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
     opacity: 1;
@@ -123,4 +127,20 @@ canvas {
   73%, 74% {
     opacity: 0.55;
   }
+}
+@keyframes heartbeat {
+  0% { transform: scale(1);}
+  20% { transform: scale(1.1);}
+  40% { transform: scale(1);}
+  60% { transform: scale(1.15);}
+  80% { transform: scale(1);}
+  100% {transform: scale(1);}
+}
+#bigHeart {
+  width: 180px;
+  margin: 0 auto 24px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: heartbeat 1.2s infinite;
 }
